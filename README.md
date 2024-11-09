@@ -16,5 +16,11 @@ Allow users to start/stop capturing, filter packets, or view details of a specif
 # Packet Analysis (Optional):
 Implement logic to analyze captured packets based on your project goals.
 This could involve identifying specific protocols, suspicious activity, or patterns in network traffic
+# Outputs
+![image](https://github.com/user-attachments/assets/72c9fa1e-ceea-4d28-9c25-995e0a903ea7)
+![image](https://github.com/user-attachments/assets/d1c6b25e-f8a7-49e9-95e5-6bf6064d21a4)
+![image](https://github.com/user-attachments/assets/be729f9c-2d82-48b0-a914-ca0df4c5f682)
+
+
 
 
