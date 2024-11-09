@@ -1,0 +1,92 @@
+<dependency>
+    <groupId>org.pcap4j</groupId>
+    <artifactId>pcap4j-core</artifactId>
+    <version>1.7.4</version>
+</dependency>
+import org.pcap4j.core.*;
+import org.pcap4j.packet.*;
+import org.pcap4j.packet.IpV4Packet.IpV4Header;
+
+import java.net.InetAddress;
+
+public class PacketSniffer {
+
+    public static void main(String[] args) {
+        try {
+            // Get the network interface to capture packets on
+            PcapNetworkInterface device = Pcaps.findAllDevs().stream()
+                    .filter(dev -> dev.getName().equals("eth0")) // Replace with your network interface name
+                    .findFirst()
+                    .orElseThrow(() -> new PcapNativeException("Network interface not found"));
+
+            // Open the device for packet capturing
+            PcapHandle handle = device.openLive(65536, PcapNetworkInterface.PromiscuousMode.PROMISCUOUS, 1000);
+
+            // Set a packet listener to capture and process packets
+            handle.loop(-1, packet -> {
+                try {
+                    // Print packet details
+                    System.out.println("Packet captured: ");
+                    System.out.println("Timestamp: " + packet.getTimestamp());
+                    System.out.println("Packet length: " + packet.length());
+
+                    // Extract and display IP packet details
+                    if (packet.contains(IpV4Packet.class)) {
+                        IpV4Packet ipPacket = packet.get(IpV4Packet.class);
+                        IpV4Header ipHeader = ipPacket.getHeader();
+                        System.out.println("Source IP: " + ipHeader.getSrcAddr());
+                        System.out.println("Destination IP: " + ipHeader.getDstAddr());
+
+                        if (packet.contains(TcpPacket.class)) {
+                            TcpPacket tcpPacket = packet.get(TcpPacket.class);
+                            System.out.println("Source Port: " + tcpPacket.getHeader().getSrcPort());
+                            System.out.println("Destination Port: " + tcpPacket.getHeader().getDstPort());
+                        } else if (packet.contains(UdpPacket.class)) {
+                            UdpPacket udpPacket = packet.get(UdpPacket.class);
+                            System.out.println("Source Port: " + udpPacket.getHeader().getSrcPort());
+                            System.out.println("Destination Port: " + udpPacket.getHeader().getDstPort());
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        } catch (PcapNativeException | NotOpenException e) {
+            e.printStackTrace();
+        }
+    }
+}
+if (packet instanceof EthernetPacket) {
+    EthernetPacket ethPacket = (EthernetPacket) packet;
+    System.out.println("Ethernet header: " + ethPacket);
+    if (ethPacket.getPayload() instanceof IpPacket) {
+        IpPacket ipPacket = (IpPacket) ethPacket.getPayload();
+        System.out.println("IP source: " + ipPacket.getHeader().getSrcAddr());
+        System.out.println("IP destination: " + ipPacket.getHeader().getDstAddr());
+    }
+}
+private static void decodePacket(Packet packet) {
+        // Decode Ethernet Frame
+        if (packet.contains(EthernetPacket.class)) {
+            EthernetPacket ethernetPacket = packet.get(EthernetPacket.class);
+            System.out.println("Ethernet Header: ");
+            System.out.println("Source MAC: " + ethernetPacket.getHeader().getSrcAddr());
+            System.out.println("Destination MAC: " + ethernetPacket.getHeader().getDstAddr());
+        }
+
+        // Decode IP Packet
+        if (packet.contains(IpV4Packet.class)) {
+            IpV4Packet ipPacket = packet.get(IpV4Packet.class);
+            System.out.println("IP Header: ");
+            System.out.println("Source IP: " + ipPacket.getHeader().getSrcAddr());
+            System.out.println("Destination IP: " + ipPacket.getHeader().getDstAddr());
+        }
+
+        // Decode TCP/UDP Packet
+        if (packet.contains(TcpPacket.class)) {
+            TcpPacket tcpPacket = packet.get(TcpPacket.class);
+            System.out.println("TCP Header: ");
+            System.out.println("Source Port: " + tcpPacket.getHeader().getSrcPort());
+            System.out.println("Destination Port: " + tcpPacket.getHeader().getDstPort());
+        }
+    }
